@@ -29,6 +29,6 @@ License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megköté
   
 ### 09.14. hét
 **TODO:**
-- [ ] MySQL függőségek keresése backendben, lecserelés esetén miket kellene módosítani:
-- [ ] Adatbázis indexek felderítése (Slack-en utána kérdezni, ha nincs meg):
+- [ ] MySQL függőségek keresése backendben, lecserelés esetén miket kellene módosítani: **core** mappában MySQLBulkLoader fájlból tölt be táblába.
+- [ ] Adatbázis indexek felderítése (Slack-en utána kérdezni, ha nincs meg): migration.sql-ben KEY_MUTATION_EVENT_DETAILS, többi általában 1 oszlopra.
 - [ ] Frontend kód átnézése: új fül hozzadása vagy keresések germline szűkítése milyen teendőkkel járna:
