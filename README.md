@@ -28,7 +28,13 @@ License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megköté
     - [ ] Lehetőség inbreeding mutációk keresésére
   
 ### 09.14. hét
-**TODO:**
-- [ ] MySQL függőségek keresése backendben, lecserelés esetén miket kellene módosítani: **core** mappában MySQLBulkLoader fájlból tölt be táblába.
-- [ ] Adatbázis indexek felderítése (Slack-en utána kérdezni, ha nincs meg): migration.sql-ben KEY_MUTATION_EVENT_DETAILS, többi általában 1 oszlopra.
+- [x] MySQL függőségek keresése backendben, lecserelés esetén miket kellene módosítani: **core** mappában MySQLBulkLoader fájlból tölt be táblába.
+- [x] Adatbázis indexek felderítése (Slack-en utána kérdezni, ha nincs meg): migration.sql-ben KEY_MUTATION_EVENT_DETAILS, többi általában 1 oszlopra.
 - [ ] Frontend kód átnézése: új fül hozzadása vagy keresések germline szűkítése milyen teendőkkel járna:
+
+### 09.21. hét.
+**TODO:**
+- [ ] Importálás megvizsgálása: hogyan történik, milyen bemenete lehet, **core** mappán kívül is implementálva van-e:
+   **core** mappán belül **scripts**-ben találhatóak azok a command line-ból futtatható Perl scriptek, amik például az adatok importálását végzik, úgy hogy meghívják a **core**-s pl ImportMutSigData *run()* metódusát. Majd a kapott fájlt továbbítja a MutSigReader-nek, ami betölti a MySQLBulkLoader és a DaoMutSig segítségével az adatbázisba.
+- [ ] Bináris fájlok betöltése: Semmi jelét nem találtam.
+- [ ] Betöltés multithread?
