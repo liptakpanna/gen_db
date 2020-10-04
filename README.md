@@ -33,8 +33,12 @@ License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megköté
 - [ ] Frontend kód átnézése: új fül hozzadása vagy keresések germline szűkítése milyen teendőkkel járna:
 
 ### 09.21. hét.
-**TODO:**
 - [ ] Importálás megvizsgálása: hogyan történik, milyen bemenete lehet, **core** mappán kívül is implementálva van-e:
    **core** mappán belül **scripts**-ben találhatóak azok a command line-ból futtatható Perl scriptek, amik például az adatok importálását végzik, úgy hogy meghívják a **core**-s pl ImportMutSigData *run()* metódusát. Majd a kapott fájlt továbbítja a MutSigReader-nek, ami betölti a MySQLBulkLoader és a DaoMutSig segítségével az adatbázisba.
 - [ ] Bináris fájlok betöltése: Semmi jelét nem találtam.
 - [ ] Betöltés multithread?
+
+### 09.28. hét.
+**TODO:**
+ - Foreign key check ki van kapcsolva a MySQLBulkLoader-ben
+ - Session controllert is kell indítani hozzá
