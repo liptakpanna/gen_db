@@ -39,6 +39,23 @@ License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megköté
 - [ ] Betöltés multithread?
 
 ### 09.28. hét.
-**TODO:**
  - Foreign key check ki van kapcsolva a MySQLBulkLoader-ben
  - Session controllert is kell indítani hozzá
+ 
+### 10.05. hét.
+ - Fájl kérés teszteléshez -> melanoma tanulmány
+ - Logolásokkal kiegészítés: MySQLBulkLoader-ben, hogy kiderüljön, hol a szűk keresztmetszet
+
+### 10.12. hét.
+ - Backend szerkezetének átnézése
+ - Email küldes kérdésekkel: fájl importálás core mappán kívül is megtalálható-e? párhuzamos importálás? bináris fájl betöltése?
+ 
+### 10.19. hét.
+ - Adatbázis verziók nem voltak kompatibilisek a backend verzióval/seed adatbázissal, ezért manuálisan kellett kiegészíteni a hiányzó oszlopokkal.
+ - Futattás teszt tanulmányokkal
+ - Email-re érkezett válasz: nem található meg egyelőre, mert még nem tudják hogyan csinálják; problémás, mert vannak olyan műveletek, ahol ellenőrizni kell, hogy létezik-e már rekord azon a néven, ha nem akkor hozzáadni; nincs rá lehetőség.
+ 
+### 10.26. hét.
+ - Futtatás a melanoma tanulmányra: log elemzése, ennek alapján logolás bővítése
+ - MySQL-ben létezik-e bináris fájl betöltés: 
+ 
