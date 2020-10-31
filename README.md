@@ -57,5 +57,7 @@ License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megköté
  
 ### 10.26. hét.
  - Futtatás a melanoma tanulmányra: log elemzése, ennek alapján logolás bővítése
- - MySQL-ben létezik-e bináris fájl betöltés: 
+    - ImportMutationData osztályban logolás: 1 sec alatt 5-15 ezer sort dolgoz fel az extended_mutation fájlból.
+    - 1.4 millió adat feldolgozása: 10p ImportMutationData, 10p load into mutation_event, 10p load into mutation
+ - MySQL-ben létezik-e bináris fájl betöltés: load data bináris fájlra null-t tölt be az adatbázisba.
  
