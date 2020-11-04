@@ -55,9 +55,16 @@ License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megköté
  - Futattás teszt tanulmányokkal
  - Email-re érkezett válasz: nem található meg egyelőre, mert még nem tudják hogyan csinálják; problémás, mert vannak olyan műveletek, ahol ellenőrizni kell, hogy létezik-e már rekord azon a néven, ha nem akkor hozzáadni; nincs rá lehetőség.
  
-### 10.26. hét.
+### 10.26. - 11.02. hét.
  - Futtatás a melanoma tanulmányra: log elemzése, ennek alapján logolás bővítése
-    - ImportMutationData osztályban logolás: 1 sec alatt 5-15 ezer sort dolgoz fel az extended_mutation fájlból.
-    - 1.4 millió adat feldolgozása: 10p ImportMutationData, 10p load into mutation_event, 10p load into mutation
- - MySQL-ben létezik-e bináris fájl betöltés: load data bináris fájlra null-t tölt be az adatbázisba.
+    - ImportMutationData osztályban logolás: 
+        - 1 sec alatt 5-15 ezer sort dolgoz fel az extended_mutation fájlból.
+        - Sorok feldolgozása közben lekérdezések: Sample(Cached) Cancer_Study_ID(FK) és Stable_ID(Unique) alapján, Uniprot Uniprot_ID(Key) alapján, Gene(cached) geneSymbol alapján guess-ek közül, Mutation_event entrez,chr,start_pos,end_pos,tumor_seq,protein_change,type(közös index) alapján
+    - 1.4 millió adat feldolgozása, de ebből csak kb 550k kerül be (hiányzik CHR37 az adatbázisból?): 
+        - Kb 10p ImportMutationData sorok ellenőrzése, majd kb fél perc, hogy tempfile-ba betöltse mutation_event és mutation rekordokat
+        - Kb 7p Load tempfileból into mutation_event , FK check off, ez MySQLBulkLoader
+        - Kb 18p Load tempfileból into mutation, FK check off, ez MySQLBulkLoader
+        - Egész tanulmány importálás 40 percet vesz igénybe
+    - Ötlet: Tempfile több kisebb részre osztása és ezek párhuzamos betöltése, de kell clean up, ha bármelyik szál hibával ér véget, illetve az ID auto_increment mutation_event-nél és előre be van állítva ellenőrizni kell, hogy okozhat-e problémát.
+ - MySQL-ben létezik-e bináris fájl betöltés: pg_read_binary_file megfelelője - esetleg blob, de az oszlop, és lassabb.
  
