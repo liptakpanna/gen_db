@@ -68,3 +68,11 @@ License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megköté
     - Ötlet: Tempfile több kisebb részre osztása és ezek párhuzamos betöltése, de kell clean up, ha bármelyik szál hibával ér véget, illetve az ID auto_increment mutation_event-nél és előre be van állítva ellenőrizni kell, hogy okozhat-e problémát.
  - MySQL-ben létezik-e bináris fájl betöltés: pg_read_binary_file megfelelője - esetleg blob, de az oszlop, és lassabb.
  
+### 11.09. hét
+ - Skálázódás kérdése: eddig 1.4 millió mutációból elfogadott, azaz valójában betöltött 550 ezret
+  - Több: mivel sok kritériumnak kell megfelelni, ezért más cBioPortal-os tanulmányokból szerettem volna hozzáadni mutációkat, de az extended_mutation fájlok header-ja eltérő oszlopból áll (132 a felhasznált melanoma tanulmányé). Ahhoz, hogy ez működjön nem elég hozzáadni a sorokat, hanem korrigálni kell ezeket az oszlopbeli eltéréseket.
+  - Kevesebb: kb megfelezve 700k mutációból (viszonylag véletlenszerűen törölt) 310ezret olvasott be. 
+    - Kb 5 perc alatt olvasott végig 700 ezer sort
+    - Kb 2 perc Load tempfileból into mutation_event
+    - Kb 4 perc Load tempfileból into mutation
+    - Egész csökkentett tanulmány importálása 11 perc volt
