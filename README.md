@@ -60,7 +60,7 @@ License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megköté
     - ImportMutationData osztályban logolás: 
         - 1 sec alatt 5-15 ezer sort dolgoz fel az extended_mutation fájlból.
         - Sorok feldolgozása közben lekérdezések: Sample(Cached) Cancer_Study_ID(FK) és Stable_ID(Unique) alapján, Uniprot Uniprot_ID(Key) alapján, Gene(cached) geneSymbol alapján guess-ek közül, Mutation_event entrez,chr,start_pos,end_pos,tumor_seq,protein_change,type(közös index) alapján
-    - 1.4 millió adat feldolgozása, de ebből csak kb 550k kerül be (hiányzik CHR37 az adatbázisból?): 
+    - 1.4 millió adat feldolgozása, de ebből csak kb 550k kerül be : 
         - Kb 10p ImportMutationData sorok ellenőrzése, majd kb fél perc, hogy tempfile-ba betöltse mutation_event és mutation rekordokat
         - Kb 7p Load tempfileból into mutation_event , FK check off, ez MySQLBulkLoader
         - Kb 18p Load tempfileból into mutation, FK check off, ez MySQLBulkLoader
@@ -79,4 +79,9 @@ License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megköté
     
 ### 11.09. hét
 - data_mutations_extended fájl oszlopainak értelmezése: [Összefoglaló](https://github.com/liptakpanna/gen_db/blob/master/docs/mutation_oszlopok.odt)
-- Ezek alapján új mutációk generálása, hogy az importált mutációk száma elérhesse az 1 milliót
+- Ezek alapján új mutációk generálása, hogy az importált mutációk száma elérhesse az 1 milliót:
+    - 2 millió adat feldolgozása, ebből kb 1.14 millió kerül be ténylegesen: 
+        - Kb 15p ImportMutationData sorok ellenőrzése, majd kb 2*fél perc, hogy tempfile-ba betöltse mutation_event és mutation rekordokat
+        - Kb 32p Load tempfileból into mutation_event
+        - Kb 56p Load tempfileból into mutation
+        - Egész tanulmány importálás 2 órát vett igénybe (előző tanulmányok törölve lettek előtte, így mindent 0-ról importált)
