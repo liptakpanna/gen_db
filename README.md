@@ -55,7 +55,7 @@ License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megköté
  - Futattás teszt tanulmányokkal
  - Email-re érkezett válasz: nem található meg egyelőre, mert még nem tudják hogyan csinálják; problémás, mert vannak olyan műveletek, ahol ellenőrizni kell, hogy létezik-e már rekord azon a néven, ha nem akkor hozzáadni; nincs rá lehetőség.
  
-### 10.26. - 11.02. hét.
+### 10.26.
  - Futtatás a melanoma tanulmányra: log elemzése, ennek alapján logolás bővítése
     - ImportMutationData osztályban logolás: 
         - 1 sec alatt 5-15 ezer sort dolgoz fel az extended_mutation fájlból.
@@ -68,7 +68,7 @@ License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megköté
     - Ötlet: Tempfile több kisebb részre osztása és ezek párhuzamos betöltése, de kell clean up, ha bármelyik szál hibával ér véget, illetve az ID auto_increment mutation_event-nél és előre be van állítva ellenőrizni kell, hogy okozhat-e problémát.
  - MySQL-ben létezik-e bináris fájl betöltés: pg_read_binary_file megfelelője - esetleg blob, de az oszlop, és lassabb.
  
-### 11.09. hét
+### 11.02. hét
  - Skálázódás kérdése: eddig 1.4 millió mutációból elfogadott, azaz valójában betöltött 550 ezret
   - Több: mivel sok kritériumnak kell megfelelni, ezért más cBioPortal-os tanulmányokból szerettem volna hozzáadni mutációkat, de az extended_mutation fájlok header-ja eltérő oszlopból áll (132 a felhasznált melanoma tanulmányé). Ahhoz, hogy ez működjön nem elég hozzáadni a sorokat, hanem korrigálni kell ezeket az oszlopbeli eltéréseket.
   - Kevesebb: kb megfelezve 700k mutációból (viszonylag véletlenszerűen törölt) 310ezret olvasott be. 
@@ -76,3 +76,7 @@ License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megköté
     - Kb 2 perc Load tempfileból into mutation_event
     - Kb 4 perc Load tempfileból into mutation
     - Egész csökkentett tanulmány importálása 11 perc volt
+    
+### 11.09. hét
+- data_mutations_extended fájl oszlopainak értelmezése: [Összefoglaló](https://github.com/liptakpanna/gen_db/blob/master/docs/mutation_oszlopok.odt)
+- Ezek alapján új mutációk generálása, hogy az importált mutációk száma elérhesse az 1 milliót
