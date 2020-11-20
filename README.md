@@ -85,3 +85,10 @@ License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megköté
         - Kb 32p Load tempfileból into mutation_event
         - Kb 56p Load tempfileból into mutation
         - Egész tanulmány importálás 2 órát vett igénybe (előző tanulmányok törölve lettek előtte, így mindent 0-ról importált)
+        
+### 11.16. hét
+ - Plotok:
+ 
+ ![Line processing plot](https://github.com/liptakpanna/gen_db/blob/master/docs/cbioportal_line_process_plot.png) ![Load data into database plot](https://github.com/liptakpanna/gen_db/blob/master/docs/cbioportal_load_data_plot.png)
+ - A sorok feldolgozása után egy tempfile-ból kerülnek betöltésre a rekordok az adatbázisba. Egy táblához tartozó tempfile a betöltendő sorok adatait tartalmazza tab-bal tagolva.
+ - Párhuzamosítás:
