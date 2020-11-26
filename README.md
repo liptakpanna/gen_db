@@ -89,6 +89,12 @@ License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megköté
 ### 11.16. hét
  - Plotok:
  
- ![Line processing plot](https://github.com/liptakpanna/gen_db/blob/master/docs/cbioportal_line_process_plot.png) ![Load data into database plot](https://github.com/liptakpanna/gen_db/blob/master/docs/cbioportal_load_data_plot.png)
+ ![Data validation plot](https://github.com/liptakpanna/gen_db/blob/master/docs/cbioportal_data_validation_plot.png) ![Line processing plot](https://github.com/liptakpanna/gen_db/blob/master/docs/cbioportal_line_process_plot.png) ![Load data into database plot](https://github.com/liptakpanna/gen_db/blob/master/docs/cbioportal_load_data_plot.png)
  - A sorok feldolgozása után egy tempfile-ból kerülnek betöltésre a rekordok az adatbázisba. Egy táblához tartozó tempfile a betöltendő sorok adatait tartalmazza tab-bal tagolva.
- - Párhuzamosítás:
+ - Párhuzamosítás: az első probléma az volt, hogy a MySQLBulkLoader-ből egy példány van mindegyik táblához, lekérdezéskor ha nem létezik létrehozza, ha létezik, akkor visszadja. Ez azért probléma, mert minden objektumnak saját tempfile-ja van, amiből betölti az adatokat, és azt szeretném elérni, hogy több tempfile-ból párhuzamosan töltse be. Azt a megoldást választottam, hogy bevezettem az osztályhoz egy Thread Id mezőt, aminek szintén szerepe van, amikor lekérdezésre kerül, így pl a 'mutation' táblához 2 MySQLBulkLoader is tartozik különböző Thread Id-val(1 és 2), ha 2 szálon akarjuk párhuzamosítani.
+ 
+### 11.23. hét
+- Párhuzamosítás folytatása: az ImportMutationData osztályban a sorok feldolgozása után eredetileg betölti az adatokat soronként a tempfile, ezt úgy módosítom, hogy szálak számának megfelelően szétosztom őket külünböző tempfile-okba. Ha ez meg van, akkkor a MySQLBulkLoader-ben, amikor meghívódik a flushAll metódus, azaz minden bulk loaderhez tartozó tempfile-t importálni kezd, akkor ha egy adott táblához több MySQLBulkLoader is tartozik (ezek a mutation és mutation_event), akkor ezeknek az importálását párhuzamosan indítsa el (CompletableFuture segítségével). Megvárja, hogy mindegyik szál véget érjen és meg a következő táblára. Fontos, hogy csak egy táblához tartozó betöltést lehet párhuzamosítani, hisz a mutation a soraiban hivatkozik majd a már betöltött event-re.
+- Párhuzamosítás eredménye 2 szálon:
+
+    
