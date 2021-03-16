@@ -1,100 +1,104 @@
-# Genetikai adatbázisok
+# Genetikai adatbázisok - 2021
 
-[Bevezető előadás](https://github.com/liptakpanna/gen_db/blob/master/docs/gen_db.pptx)
+Cél: VCF és egyéb genomikai adatok támogatására adatbázis létrehozása.
 
-## cBioPortal
-
-[Github](https://github.com/cBioPortal/cbioportal)
-
-[Dokumentáció](https://docs.cbioportal.org/)
-
-Külön dokumentáció, repo van [backend-ről](https://github.com/cBioPortal/cbioportal/blob/master/docs/Backend-Code-Organization.md) és [frontend-ről](https://github.com/cbioportal/cbioportal-frontend).
-
-- Backend: Java, Spring, Maven
-- Frontend: React, TypeScript, MobX
-
-Fejlesztést támogatják [(guidlines)](https://github.com/cBioPortal/cbioportal/blob/master/docs/Backend-Development-Guidelines.md): van [Slack channel](https://slack.cbioportal.org/), ahol segítenek, ha kérdés van.
-
-License: ha jól értelmezem, akkor szabadon felhasználható, annyi a megkötés, hogy mielőtt valamit publikussá akar tenni az ember, köteles megosztani előbb a cBioPortal-lal.
-
-### 09.07. hét
-* cBioPortal fejlesztői dokumentációját, struktúráját megnézni 
-    - [x] Függőségek: [mappák köztiről kép](https://github.com/cBioPortal/cbioportal/raw/b81ec59ba59032ce00449e3773fb92c2d3be6d8c/docs/images/maven-module-dependencies.png). JWT tokennel autorizál, oauth2-t felhasználva. **service** mappában Service-k, **web** mappában Controller-ek.
-    - [x] Adatbázis-kezelő: MySQL adatbázist használ. Backend oldalon MyBatis lib-el van megoldva az Entity-k elérése pl **model**/Gene, **persistance-mybatis**/GeneMapper (interface), GeneMapperMyBatisRepository (interface implementációja), GeneMapper.xml <- itt van SQL utasítás részletesen
-    - [x] Adatbázisséma: [kép](https://github.com/cBioPortal/cbioportal/blob/master/db-scripts/src/main/resources/cbioportal-er-diagram.pdf)
-* Összegyűjteni, hogy ezek alapján mi konfigurálható:
-    - [ ] Germline mutációk hatékonyabb feltöltése (indexelés lassú?): lehetséges, sőt támogatott [link](https://www.cbioportal.org/results?session_id=5b2cd03c498eb8b3d566adbc)
-    - [ ] Mutalisk: szignatúra dekompizíció lehetősége -> ezek hasonlóak? [Issue1](https://github.com/cBioPortal/cbioportal/issues/7833), [Issue2](https://github.com/cBioPortal/cbioportal/issues/7057)
-    - [ ] Lehetőség inbreeding mutációk keresésére
+### 02.15. hét
+- VCF fájl adatstruktúrájának vizsgálata:
+    Variánsok a referencia genom mentén
+- [VCFServer](https://pubmed.ncbi.nlm.nih.gov/31127704/): 
+    - web file system, core: C, frontend: JS, backend: Perl
+    - VCF -> JSON array -> MongoDB
+- Heti TODO: TileDB, SeqArray, MonetDB, Szakirodalmak olvasása
   
-### 09.14. hét
-- [x] MySQL függőségek keresése backendben, lecserelés esetén miket kellene módosítani: **core** mappában MySQLBulkLoader fájlból tölt be táblába.
-- [x] Adatbázis indexek felderítése (Slack-en utána kérdezni, ha nincs meg): migration.sql-ben KEY_MUTATION_EVENT_DETAILS, többi általában 1 oszlopra.
-- [ ] Frontend kód átnézése: új fül hozzadása vagy keresések germline szűkítése milyen teendőkkel járna:
+### 02.22. hét
+- [SeqArray](https://academic.oup.com/bioinformatics/article/33/15/2251/3072873)
+    - C++ impl, R-ben elérhető (BioConductor)
+    - Genomic Data Structure: multiple array-oriented datasets
+    - tömörítés, parallel: több local file-ba ír és összemergeli
 
-### 09.21. hét.
-- [ ] Importálás megvizsgálása: hogyan történik, milyen bemenete lehet, **core** mappán kívül is implementálva van-e:
-   **core** mappán belül **scripts**-ben találhatóak azok a command line-ból futtatható Perl scriptek, amik például az adatok importálását végzik, úgy hogy meghívják a **core**-s pl ImportMutSigData *run()* metódusát. Majd a kapott fájlt továbbítja a MutSigReader-nek, ami betölti a MySQLBulkLoader és a DaoMutSig segítségével az adatbázisba.
-- [ ] Bináris fájlok betöltése: Semmi jelét nem találtam.
-- [ ] Betöltés multithread?
+-[GMQL](https://re.public.polimi.it/retrieve/handle/11311/1146279/539727/290300a109.pdf)
+    - GenoMetric Query Language
+    - region- és array-based gen representation
+    - Apacha Spark, cloud-based engine
+    - row-based tárolás, join rosszul skálázódik
+    - webes interface
+    - 3D-s tárolás: koordináta, minta, signal (minden attribútum)
+    - Scala API
 
-### 09.28. hét.
- - Foreign key check ki van kapcsolva a MySQLBulkLoader-ben
- - Session controllert is kell indítani hozzá
- 
-### 10.05. hét.
- - Fájl kérés teszteléshez -> melanoma tanulmány
- - Logolásokkal kiegészítés: MySQLBulkLoader-ben, hogy kiderüljön, hol a szűk keresztmetszet
+-[GenomicsDB](https://gatk.broadinstitute.org/hc/en-us/articles/360035891051-GenomicsDB)
+    - GVCF adatformátum: minden egyes genom pozícióra van rekord, akkor is, ha nincs ott mutáció
+    - API: Java, Python, C++
+    - parallel, columnar sparse arrays
+    - shared-nothing architektúra
 
-### 10.12. hét.
- - Backend szerkezetének átnézése
- - Email küldes kérdésekkel: fájl importálás core mappán kívül is megtalálható-e? párhuzamos importálás? bináris fájl betöltése?
- 
-### 10.19. hét.
- - Adatbázis verziók nem voltak kompatibilisek a backend verzióval/seed adatbázissal, ezért manuálisan kellett kiegészíteni a hiányzó oszlopokkal.
- - Futattás teszt tanulmányokkal
- - Email-re érkezett válasz: nem található meg egyelőre, mert még nem tudják hogyan csinálják; problémás, mert vannak olyan műveletek, ahol ellenőrizni kell, hogy létezik-e már rekord azon a néven, ha nem akkor hozzáadni; nincs rá lehetőség.
- 
-### 10.26.
- - Futtatás a melanoma tanulmányra: log elemzése, ennek alapján logolás bővítése
-    - ImportMutationData osztályban logolás: 
-        - 1 sec alatt 5-15 ezer sort dolgoz fel az extended_mutation fájlból.
-        - Sorok feldolgozása közben lekérdezések: Sample(Cached) Cancer_Study_ID(FK) és Stable_ID(Unique) alapján, Uniprot Uniprot_ID(Key) alapján, Gene(cached) geneSymbol alapján guess-ek közül, Mutation_event entrez,chr,start_pos,end_pos,tumor_seq,protein_change,type(közös index) alapján
-    - 1.4 millió adat feldolgozása, de ebből csak kb 550k kerül be : 
-        - Kb 10p ImportMutationData sorok ellenőrzése, majd kb fél perc, hogy tempfile-ba betöltse mutation_event és mutation rekordokat
-        - Kb 7p Load tempfileból into mutation_event , FK check off, ez MySQLBulkLoader
-        - Kb 18p Load tempfileból into mutation, FK check off, ez MySQLBulkLoader
-        - Egész tanulmány importálás 40 percet vesz igénybe
-    - Ötlet: Tempfile több kisebb részre osztása és ezek párhuzamos betöltése, de kell clean up, ha bármelyik szál hibával ér véget, illetve az ID auto_increment mutation_event-nél és előre be van állítva ellenőrizni kell, hogy okozhat-e problémát.
- - MySQL-ben létezik-e bináris fájl betöltés: pg_read_binary_file megfelelője - esetleg blob, de az oszlop, és lassabb.
- 
-### 11.02. hét
- - Skálázódás kérdése: eddig 1.4 millió mutációból elfogadott, azaz valójában betöltött 550 ezret
-  - Több: mivel sok kritériumnak kell megfelelni, ezért más cBioPortal-os tanulmányokból szerettem volna hozzáadni mutációkat, de az extended_mutation fájlok header-ja eltérő oszlopból áll (132 a felhasznált melanoma tanulmányé). Ahhoz, hogy ez működjön nem elég hozzáadni a sorokat, hanem korrigálni kell ezeket az oszlopbeli eltéréseket.
-  - Kevesebb: kb megfelezve 700k mutációból (viszonylag véletlenszerűen törölt) 310ezret olvasott be. 
-    - Kb 5 perc alatt olvasott végig 700 ezer sort
-    - Kb 2 perc Load tempfileból into mutation_event
-    - Kb 4 perc Load tempfileból into mutation
-    - Egész csökkentett tanulmány importálása 11 perc volt
-    
-### 11.09. hét
-- data_mutations_extended fájl oszlopainak értelmezése: [Összefoglaló](https://github.com/liptakpanna/gen_db/blob/master/docs/mutation_oszlopok.odt)
-- Ezek alapján új mutációk generálása, hogy az importált mutációk száma elérhesse az 1 milliót:
-    - 2 millió adat feldolgozása, ebből kb 1.14 millió kerül be ténylegesen: 
-        - Kb 15p ImportMutationData sorok ellenőrzése, majd kb 2*fél perc, hogy tempfile-ba betöltse mutation_event és mutation rekordokat
-        - Kb 32p Load tempfileból into mutation_event
-        - Kb 56p Load tempfileból into mutation
-        - Egész tanulmány importálás 2 órát vett igénybe (előző tanulmányok törölve lettek előtte, így mindent 0-ról importált)
-        
-### 11.16. hét
- - Plotok:
- 
- ![Data validation plot](https://github.com/liptakpanna/gen_db/blob/master/docs/cbioportal_data_validation_plot.png) ![Line processing plot](https://github.com/liptakpanna/gen_db/blob/master/docs/cbioportal_line_process_plot.png) ![Load data into database plot](https://github.com/liptakpanna/gen_db/blob/master/docs/cbioportal_load_data_plot.png)
- - A sorok feldolgozása után egy tempfile-ból kerülnek betöltésre a rekordok az adatbázisba. Egy táblához tartozó tempfile a betöltendő sorok adatait tartalmazza tab-bal tagolva.
- - Párhuzamosítás: az első probléma az volt, hogy a MySQLBulkLoader-ből egy példány van mindegyik táblához, lekérdezéskor ha nem létezik létrehozza, ha létezik, akkor visszadja. Ez azért probléma, mert minden objektumnak saját tempfile-ja van, amiből betölti az adatokat, és azt szeretném elérni, hogy több tempfile-ból párhuzamosan töltse be. Azt a megoldást választottam, hogy bevezettem az osztályhoz egy Thread Id mezőt, aminek szintén szerepe van, amikor lekérdezésre kerül, így pl a 'mutation' táblához 2 MySQLBulkLoader is tartozik különböző Thread Id-val(1 és 2), ha 2 szálon akarjuk párhuzamosítani.
- 
-### 11.23. hét
-- Párhuzamosítás folytatása: az ImportMutationData osztályban a sorok feldolgozása után eredetileg betölti az adatokat soronként a tempfile, ezt úgy módosítom, hogy szálak számának megfelelően szétosztom őket külünböző tempfile-okba. Ha ez meg van, akkkor a MySQLBulkLoader-ben, amikor meghívódik a flushAll metódus, azaz minden bulk loaderhez tartozó tempfile-t importálni kezd, akkor ha egy adott táblához több MySQLBulkLoader is tartozik (ezek a mutation és mutation_event), akkor ezeknek az importálását párhuzamosan indítsa el (CompletableFuture segítségével). Megvárja, hogy mindegyik szál véget érjen és meg a következő táblára. Fontos, hogy csak egy táblához tartozó betöltést lehet párhuzamosítani, hisz a mutation a soraiban hivatkozik majd a már betöltött event-re.
-- Párhuzamosítás eredménye 2 szálon:
+-[MonetDB SAM/BAM modul](https://core.ac.uk/download/pdf/301631246.pdf)
+    - Column store
+    - SAM/BAM betöltése db-be, exportálás, gyakori szekvencia illesztési function-ok SQL-be implementálása
+    - R támogatás
+    - Szekvenciális/Pairwise tárolási séma
+    - Future Work: VCF modul készítése a MonetDB-hez
 
-    
+-[TileDB](https://github.com/TileDB-Inc/TileDB-VCF)
+    - Multidimensional array architektúra
+    - C++ impl, API: Java, Python, C, C++, terminál kliens
+    - jó (lineáris) skálázódás, több 100k exomon tesztelt
+    - Párhuzamos query-ket támogatja: minden write független, lock-free, konzisztens
+    - multi-sample VCF-ek összemergelése
+    - 3D-ben a VCF adatokat tárolja, 1D-be a metaadatokat
+    - Fejlesztik folyamatosan
+
+- Heti TODO:
+    - MonetDB: rákérdezni, hogy VCF modult megvalósították-e, milyen index lehetőségek vannak
+    - TileDB: architektúra átnézése, kipróbálás, létezik-e SQL-szerű lekérdezés, Query optimalizálás, fejlesztői doksi, storage manager vagy db?
+
+
+### 03.01. hét
+- MonetDB: nincs VCF modul, de leveleztem velük és érdekli őket a lehetőség
+
+- TileDB:
+    - Más tanulmányban Storage manager-ként hivatkoznak rá
+    - Data management system: dense és sparse array-hez is optimális
+    - Update műveletek batch-ekbe vannak, amik fragmenteket alkotnak és szekvenciálisan alkalmazzák őket timestamp alapján, ha túl sok a fragment akkor consolidation lépés keretében többet összeolvasztanak
+    - párhuzamos: multithreas és multiprocess, lightweight lockolás, atomi műveletek
+    - Array: dimenziók (domain-ek kombinációja), attribútumok
+    - Adattípusok: int, float, char, vektor (fix vagy változó hossz)
+    - Tárolás: hiába multidim disk-en 1D-ben kell -> global cell order meghatározása (sor/oszlop folytonos állítható)
+        - Tile méret megadása, tile-on belüli és tile order megadása
+        - Sparse esetben: data tile korlátos, hogy hány nem üres cella van benne
+        - Tile alapú tömörítés
+        - Fizikailag: 1 array - 1 folder és azonbelül pl minden attríbútumhoz 1-2 file tartozik
+    - Sparse array indexelés: R-fa alapú
+    - Windows-on nem sikerült kipróbálni
+    - Nincs SQL-szerű lekérdező nyelv hozzá
+
+- MonetDB vs PostgreSQL tanulmány [link](https://www.researchgate.net/publication/280232082_Genome_Data_Management_using_RDBMSs)
+    - PostgreSQL: disk-en van -> I/O optimalizálás az index célja
+    - MonetDB: main-memory-ban van -> CPU számítás optimalizálás az index célja
+        - Önoptimalizáló rendszere van: adaptive index, CPU-tuned query execution, run-time query optimalization
+        - 1 oszlop nem fér a memóriába, akkor swap és memory mapped file-ok segítségével oldja meg -> csökken a performancia
+
+- Heti TODO:
+    - PostgreSQL: column store megoldások keresése és kipróbálása
+    - Összehasonlító tanulmányban szereplő séma és lekérdezések kipróbálása VCF adatokon: MonetDB, PostgreSQL - column store is
+
+### 03.08. hét
+- [Row vs Column store tanulmány](https://dl.acm.org/doi/abs/10.14778/1687553.1687625):
+    - Hogyan lehet column store architektúrát imitálni row-store adatbázisban?
+        - Vertikális partíció vagy minden oszlop indexelése
+    - Query executor és storage layer level-en viszont szignifikáns különbségek vannak, úgy gondolják nem lehet ugyanazt elérni
+
+- PostgreSQL column store megoldások:
+    - [Swarm64](https://swarm64.com/columnstore-index-webcast/): csak oszlop alapú indexelés
+    - [ZedStore](https://github.com/greenplum-db/postgres/tree/zedstore): belső felépítés B-fák alapján, performancián nem javít sokat, még fejlesztés alatt áll
+    - [cstore](https://github.com/citusdata/cstore_fdw): sok hiányossága van pl nincs index, p-key, f-key, de ez a legígéretesebb, ezt tesztelem
+
+- Szintetikus adatokon adatbázisok tesztelése:
+![Adatbázisok összehasonlító elemzése](https://github.com/liptakpanna/gen_db/blob/master/docs/first_db_test.png)
+
+- Heti TODO:
+    - Kooplex példa VCF-ekre és a megadott minta lekérdezések alapján a tesztek megismétlése
+    - MonetDB memória csökkentés hogyan befolyásolja a performanciát
+
+### 03.15. hét
+- VCf adatokon végzett tesztek:
+![Adatbázisok összehasonlító elemzése 2](https://github.com/liptakpanna/gen_db/blob/master/docs/second_db_test.png)
