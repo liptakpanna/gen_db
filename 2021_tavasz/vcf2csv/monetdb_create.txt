@@ -1,0 +1,121 @@
+monetdb create <dbname>
+monetdb release <dbname>
+mclient --timer=performance -u monetdb -d <dbname>
+
+--mem limit
+sudo cgcreate -g memory:monetdb
+HELY: /sys/fs/cgroup/memory
+echo 5M | sudo tee monetdb/memory.limit_in_bytes
+sudo cgexec -g memory:monetdb mserver5 (demo-t indítja el)
+--leállítás: ps ax | grep mserver5 
+sudo kill <pid>
+
+CREATE TABLE variant_call
+(
+    vcid int,
+    chrom varchar(20),
+    pos int,
+    PRIMARY KEY (vcid)
+);
+
+CREATE TABLE mutations
+(
+    mid int,
+    ref varchar(50),
+    alt varchar(50),
+    PRIMARY KEY (mid)
+);
+
+CREATE TABLE samples
+(
+    sid int,
+    name varchar(20),
+    PRIMARY KEY (sid)
+);
+
+CREATE TABLE mapping
+(
+    sid int,
+    vcid int,
+    mid int,
+    quality real,
+    coverage int,
+    allel_freq real, 
+    FOREIGN KEY (mid) REFERENCES mutations (mid),
+    FOREIGN KEY (vcid) REFERENCES variant_call (vcid),
+    FOREIGN KEY (sid) REFERENCES samples (sid)
+);
+
+CREATE TABLE sample_coverage
+(
+    sid int,
+    vcid int,
+    ref varchar(20),
+    s_coverage int, 
+    FOREIGN KEY (vcid) REFERENCES variant_call (vcid),
+    FOREIGN KEY (sid) REFERENCES samples (sid)
+);
+
+COPY INTO variant_call FROM '/home/panni/Documents/gendb/vcf2csv/variant_call2.csv' DELIMITERS ',';
+
+COPY INTO mutations FROM '/home/panni/Documents/gendb/vcf2csv/mutation2.csv' DELIMITERS ',';
+
+COPY INTO samples FROM '/home/panni/Documents/gendb/vcf2csv/sample2.csv' DELIMITERS ',';
+
+COPY INTO mapping FROM '/home/panni/Documents/gendb/vcf2csv/mapping2.csv' DELIMITERS ',';
+
+COPY INTO sample_coverage FROM '/home/panni/Documents/gendb/vcf2csv/sampleCov2.csv' DELIMITERS ',';
+
+SELECT mid, pos,ref, alt
+FROM ((variant_calling
+NATURAL JOIN mapping)
+NATURAL JOIN mutation)
+WHERE mid = 8
+ORDER BY pos, vcid;
+
+select mid, pos,ref, alt from variant_calling natural join mapping natural join mutation where mid = 8 ORDER BY pos, vcid;
+
+select mid, pos,ref, alt from variant_calling natural join mapping natural join mutation where vcid < 100 ORDER BY pos, mid;
+
+select pos, count(mid) from variant_calling natural join mapping natural join mutation group by pos order by pos;
+
+select chrom, pos, count(mid) from variant_calling natural join mapping natural join mutation group by chrom, pos order by chrom, pos;
+
+select * from variant_calling natural join mapping natural join mutation where ref = 'CG' and alt ='AGG' and pos ='26228';
+
+
+select sid, name from ((mapping natural join mutations) natural join variant_call) natural join samples where mapping.coverage > 10 and variant_call.pos = 241 and mutations.alt = 'T';
+
+select sid, name from ((mapping natural join mutations) natural join variant_call) natural join samples where mapping.coverage > 1620 and variant_call.pos = 241 and mutations.alt = 'T';
+
+select sid, name from ((mapping natural join mutations) natural join variant_call) natural join samples where mapping.coverage > 10 and variant_call.pos = 6961 and mutations.alt = 'G';
+
+CREATE VIEW bad_cov_pos AS select v.pos as bad_pos, s.sid as sid from variant_call v join sample_coverage s on v.vcid = s.vcid
+where s_coverage < 100;
+
+select sid, count(distinct pos) as db from
+(select sid, pos from ((mapping natural join mutations) natural join variant_call) natural join samples 
+where (
+((pos = 241 and alt = 'T' and allel_freq > 0.8)) or
+((pos = 5388 and alt = 'A' and allel_freq > 0.8)) or
+((pos = 28280 and alt = 'C' and allel_freq > 0.8)) or
+((pos = 16 and alt = 'C' and allel_freq > 0.8)) or
+((pos = 3102 and alt = 'A' and allel_freq > 0.8))
+)
+union
+select sid, bad_pos as pos from bad_cov_pos where bad_pos in (241,5388, 28280, 16, 3102)) as tmp
+group by sid
+having count(distinct pos) = 5;
+
+select sid, count(distinct pos) as db from
+(select sid, pos from ((mapping natural join mutations) natural join variant_call) natural join samples 
+where (
+((pos = 241 and alt = 'T' and allel_freq > 0.8)) or
+((pos = 5388 and alt = 'A' and allel_freq > 0.8)) or
+((pos = 28280 and alt = 'C' and allel_freq > 0.8)) or
+((pos = 16 and alt = 'C' and allel_freq > 0.8))
+)
+union
+select sid, bad_pos as pos from bad_cov_pos where bad_pos in (241,5388, 28280, 16)) as tmp
+group by sid
+having count(distinct pos) = 4;
