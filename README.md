@@ -102,3 +102,12 @@ Cél: VCF és egyéb genomikai adatok támogatására adatbázis létrehozása.
 ### 03.15. hét
 - VCf adatokon végzett tesztek:
 ![Adatbázisok összehasonlító elemzése 2](https://github.com/liptakpanna/gen_db/blob/master/docs/second_db_test.png)
+
+- Heti TODO:
+
+### 03.22. hét
+- Adatexploráció:
+    - sample_coverage ref vs mutations ref: eltérő, mert a sample_coverage ref 1 adott poz-ra vonatkozó referencia bázis, a mutations ref pedig magába foglalhat több bázist pl ATACATG -> A mutáció
+    - allel_freq: mintánként eltérő
+- Cache törlésével 1.futtatás vizsgálata
+- Redundáns sémák tesztelése

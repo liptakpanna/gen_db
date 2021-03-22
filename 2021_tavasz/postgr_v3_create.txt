@@ -1,0 +1,76 @@
+CREATE TABLE public.mapping3
+(
+    sid integer,
+    chrom varchar(20),
+    pos integer,
+    quality real,
+    coverage integer,
+    allel_freq real,
+    ref varchar(50),
+    alt varchar(50),
+    CONSTRAINT map_sample_fk FOREIGN KEY (sid)
+        REFERENCES public.samples (sid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT mapping3_pkey PRIMARY KEY (sid,chrom,pos,ref,alt)
+);
+
+CREATE TABLE public.sample_coverage3
+(
+    sid integer,
+    chrom varchar(20),
+    pos integer,
+    ref varchar(20),
+    s_coverage integer, 
+    CONSTRAINT cov_sample_fk FOREIGN KEY (sid)
+        REFERENCES public.samples (sid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT sample_cov3_pkey PRIMARY KEY (sid,chrom,pos)
+);
+
+
+insert into mapping3
+select sid, chrom,pos, quality, coverage, allel_freq, ref, alt from mapping2 natural join chromosome_positions;
+
+insert into sample_coverage3
+select sid, chrom, pos, ref, s_coverage from sample_coverage natural join chromosome_positions;
+
+select sid, count(distinct pos) as db from
+(select sid, pos from mapping3  natural join samples 
+where (
+((pos = 241 and alt = 'T' and allel_freq > 0.8)) or
+((pos = 5388 and alt = 'A' and allel_freq > 0.8)) or
+((pos = 28280 and alt = 'C' and allel_freq > 0.8)) or
+((pos = 16 and alt = 'C' and allel_freq > 0.8))
+)
+union
+select sid, bad_pos as pos from bad_cov_pos where bad_pos in (241,5388, 28280, 16)) as tmp
+group by sid
+having count(distinct pos) = 4;
+
+select sid, count(distinct pos) as db from
+(select sid, pos from mapping3 natural join samples 
+where (
+((pos = 241 and alt = 'T' and allel_freq > 0.8)) or
+((pos = 5388 and alt = 'A' and allel_freq > 0.8)) or
+((pos = 28280 and alt = 'C' and allel_freq > 0.8)) or
+((pos = 16 and alt = 'C' and allel_freq > 0.8)) or
+((pos = 3267 and alt = 'T' and allel_freq > 0.8))
+)
+union
+select sid, bad_pos as pos from bad_cov_pos where bad_pos in (241,5388, 28280, 16, 3267)) as tmp
+group by sid
+having count(distinct pos) = 5;
+
+SELECT sid, name 
+FROM mapping3 NATURAL JOIN samples 
+WHERE coverage > 10 AND pos = 241 AND alt = 'T';
+
+SELECT sid, name 
+FROM mapping3 NATURAL JOIN samples 
+WHERE coverage > 10 AND pos = 6961 AND alt = 'G';
+
+SELECT sid, name 
+FROM mapping3 NATURAL JOIN samples 
+WHERE coverage > 1620 AND pos = 241 AND alt = 'T';

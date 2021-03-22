@@ -1,0 +1,61 @@
+CREATE TABLE public.mapping2
+(
+    sid integer,
+    vcid integer,
+    quality real,
+    coverage integer,
+    allel_freq real,
+    ref varchar(50),
+    alt varchar(50),
+    CONSTRAINT map_var_fk FOREIGN KEY (vcid)
+        REFERENCES public.chromosome_positions (vcid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT map_sample_fk FOREIGN KEY (sid)
+        REFERENCES public.samples (sid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT mapping2_pkey PRIMARY KEY (sid,vcid,ref,alt)
+);
+
+insert into mapping2
+select sid, vcid, quality, coverage, allel_freq, ref, alt from mapping natural join mutations;
+
+select sid, count(distinct pos) as db from
+(select sid, pos from (mapping2 natural join chromosome_positions) natural join samples 
+where (
+((pos = 241 and alt = 'T' and allel_freq > 0.8)) or
+((pos = 5388 and alt = 'A' and allel_freq > 0.8)) or
+((pos = 28280 and alt = 'C' and allel_freq > 0.8)) or
+((pos = 16 and alt = 'C' and allel_freq > 0.8))
+)
+union
+select sid, bad_pos as pos from bad_cov_pos where bad_pos in (241,5388, 28280, 16)) as tmp
+group by sid
+having count(distinct pos) = 4;
+
+select sid, count(distinct pos) as db from
+(select sid, pos from (mapping2 natural join chromosome_positions) natural join samples 
+where (
+((pos = 241 and alt = 'T' and allel_freq > 0.8)) or
+((pos = 5388 and alt = 'A' and allel_freq > 0.8)) or
+((pos = 28280 and alt = 'C' and allel_freq > 0.8)) or
+((pos = 16 and alt = 'C' and allel_freq > 0.8)) or
+((pos = 3267 and alt = 'G' and allel_freq > 0.8))
+)
+union
+select sid, bad_pos as pos from bad_cov_pos where bad_pos in (241,5388, 28280, 16, 3267)) as tmp
+group by sid
+having count(distinct pos) = 5;
+
+SELECT sid, name 
+FROM (mapping2 NATURAL JOIN chromosome_positions) NATURAL JOIN samples 
+WHERE mapping2.coverage > 10 AND chromosome_positions.pos = 241 AND mapping2.alt = 'T';
+
+SELECT sid, name 
+FROM (mapping2 NATURAL JOIN chromosome_positions) NATURAL JOIN samples 
+WHERE mapping2.coverage > 10 AND chromosome_positions.pos = 6961 AND mapping2.alt = 'G';
+
+SELECT sid, name 
+FROM (mapping2 NATURAL JOIN chromosome_positions) NATURAL JOIN samples 
+WHERE mapping2.coverage > 1620 AND chromosome_positions.pos = 241 AND mapping2.alt = 'T';

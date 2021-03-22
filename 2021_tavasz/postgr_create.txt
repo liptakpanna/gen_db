@@ -1,9 +1,9 @@
-CREATE TABLE public.variant_call
+CREATE TABLE public.chromosome_positions
 (
     vcid integer NOT NULL,
     chrom varchar(20),
     pos integer,
-    CONSTRAINT variant_call_pkey PRIMARY KEY (vcid)
+    CONSTRAINT chromosome_positions_pkey PRIMARY KEY (vcid)
 );
 
 CREATE TABLE public.mutations
@@ -34,7 +34,7 @@ CREATE TABLE public.mapping
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT map_var_fk FOREIGN KEY (vcid)
-        REFERENCES public.variant_call (vcid) MATCH SIMPLE
+        REFERENCES public.chromosome_positions (vcid) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT map_sample_fk FOREIGN KEY (sid)
@@ -50,7 +50,7 @@ CREATE TABLE public.sample_coverage
     ref varchar(20),
     coverage integer, 
     CONSTRAINT cov_var_fk FOREIGN KEY (vcid)
-        REFERENCES public.variant_call (vcid) MATCH SIMPLE
+        REFERENCES public.chromosome_positions (vcid) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT cov_sample_fk FOREIGN KEY (sid)
@@ -60,8 +60,10 @@ CREATE TABLE public.sample_coverage
 );
 
 CREATE INDEX idx_mapping_mid ON mapping(mid);
+CREATE INDEX idx_mapping_allel_freq ON mapping(allel_freq);
+CREATE INDEX idx_mutations_alt ON mutations(alt);
 
-COPY variant_call FROM '/home/panni/Documents/gendb/vcf2csv/variant_call2.csv' DELIMITER ',' CSV;
+COPY chromosome_positions FROM '/home/panni/Documents/gendb/vcf2csv/variant_call2.csv' DELIMITER ',' CSV;
 
 COPY mutations FROM '/home/panni/Documents/gendb/vcf2csv/mutation2.csv' DELIMITER ',' CSV;
 
@@ -72,25 +74,25 @@ COPY mapping FROM '/home/panni/Documents/gendb/vcf2csv/mapping2.csv' DELIMITER '
 COPY sample_coverage FROM '/home/panni/Documents/gendb/vcf2csv/sampleCov2.csv' DELIMITER ',' CSV;
 
 
-select mid, pos,ref, alt from variant_call natural join mapping natural join mutations where mid = 8 ORDER BY pos, vcid;
+select mid, pos,ref, alt from chromosome_positions natural join mapping natural join mutations where mid = 8 ORDER BY pos, vcid;
 
-select pos, count(mid) from variant_call natural join mapping natural join mutations group by pos order by pos;
+select pos, count(mid) from chromosome_positions natural join mapping natural join mutations group by pos order by pos;
 
-select chrom, pos, count(mid) from variant_call natural join mapping natural join mutations group by chrom, pos order by chrom, pos;
+select chrom, pos, count(mid) from chromosome_positions natural join mapping natural join mutations group by chrom, pos order by chrom, pos;
 
-select * from variant_call natural join mapping natural join mutations where ref = 'CG' and alt ='AGG' and pos ='26228';
+select * from chromosome_positions natural join mapping natural join mutations where ref = 'CG' and alt ='AGG' and pos ='26228';
 
-select samples.sid, samples.name from ((mapping natural join mutations) natural join variant_call) natural join samples where mapping.coverage > 10 and variant_call.pos = 241 and mutations.alt = 'T';
+select samples.sid, samples.name from ((mapping natural join mutations) natural join chromosome_positions) natural join samples where mapping.coverage > 10 and chromosome_positions.pos = 241 and mutations.alt = 'T';
 
-select samples.sid, samples.name from ((mapping natural join mutations) natural join variant_call) natural join samples where mapping.coverage > 1620 and variant_call.pos = 241 and mutations.alt = 'T';
+select samples.sid, samples.name from ((mapping natural join mutations) natural join chromosome_positions) natural join samples where mapping.coverage > 1620 and chromosome_positions.pos = 241 and mutations.alt = 'T';
 
-select samples.sid, samples.name from ((mapping natural join mutations) natural join variant_call) natural join samples where mapping.coverage > 10 and variant_call.pos = 6961 and mutations.alt = 'G';
+select samples.sid, samples.name from ((mapping natural join mutations) natural join chromosome_positions) natural join samples where mapping.coverage > 10 and chromosome_positions.pos = 6961 and mutations.alt = 'G';
 
-CREATE VIEW bad_cov_pos AS select v.pos as bad_pos, s.sid as sid from variant_call v join sample_coverage s on v.vcid = s.vcid
+CREATE VIEW bad_cov_pos AS select v.pos as bad_pos, s.sid as sid from chromosome_positions v join sample_coverage s on v.vcid = s.vcid
 where s.coverage < 100;
 
 select sid, count(distinct pos) as db from
-(select sid, pos from ((mapping natural join mutations) natural join variant_call) natural join samples 
+(select sid, pos from ((mapping natural join mutations) natural join chromosome_positions) natural join samples 
 where (
 ((pos = 241 and alt = 'T' and allel_freq > 0.8)) or
 ((pos = 5388 and alt = 'A' and allel_freq > 0.8)) or
@@ -104,7 +106,7 @@ group by sid
 having count(distinct pos) = 5;
 
 select sid, count(distinct pos) as db from
-(select sid, pos from ((mapping natural join mutations) natural join variant_call) natural join samples 
+(select sid, pos from ((mapping natural join mutations) natural join chromosome_positions) natural join samples 
 where (
 ((pos = 241 and alt = 'T' and allel_freq > 0.8)) or
 ((pos = 5388 and alt = 'A' and allel_freq > 0.8)) or
